@@ -1,0 +1,190 @@
+{
+  "personal": {
+    "name": "John Doe",
+    "title": "Full Stack Developer",
+    "bio": "Passionate full-stack developer with expertise in modern web technologies. I create scalable, user-friendly applications that solve real-world problems.",
+    "email": "john@example.com",
+    "phone": "+1 (555) 123-4567",
+    "location": "New York, NY",
+    "avatar": "/placeholder.svg?height=200&width=200",
+    "resume": "/resume.pdf",
+    "social": {
+      "github": "https://github.com/johndoe",
+      "linkedin": "https://linkedin.com/in/johndoe",
+      "twitter": "https://twitter.com/johndoe",
+      "website": "https://johndoe.dev"
+    }
+  },
+  "skills": [
+    {
+      "category": "Frontend",
+      "technologies": [
+        { "name": "React", "level": 95 },
+        { "name": "Next.js", "level": 90 },
+        { "name": "TypeScript", "level": 88 },
+        { "name": "Tailwind CSS", "level": 92 }
+      ]
+    },
+    {
+      "category": "Backend",
+      "technologies": [
+        { "name": "Node.js", "level": 85 },
+        { "name": "Python", "level": 80 },
+        { "name": "PostgreSQL", "level": 82 },
+        { "name": "MongoDB", "level": 78 }
+      ]
+    },
+    {
+      "category": "DevOps",
+      "technologies": [
+        { "name": "Docker", "level": 75 },
+        { "name": "AWS", "level": 70 },
+        { "name": "Vercel", "level": 90 },
+        { "name": "Git", "level": 95 }
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "id": "1",
+      "title": "E-Commerce Platform",
+      "description": "A full-featured e-commerce platform built with Next.js, featuring user authentication, payment processing, and admin dashboard.",
+      "longDescription": "This comprehensive e-commerce solution includes user registration and authentication, product catalog management, shopping cart functionality, secure payment processing with Stripe, order management, and a complete admin dashboard for inventory and sales tracking.",
+      "technologies": ["Next.js", "TypeScript", "Prisma", "PostgreSQL", "Stripe", "Tailwind CSS"],
+      "images": [
+        "/placeholder.svg?height=400&width=600",
+        "/placeholder.svg?height=400&width=600",
+        "/placeholder.svg?height=400&width=600",
+        "/placeholder.svg?height=400&width=600"
+      ],
+      "liveUrl": "https://ecommerce-demo.vercel.app",
+      "githubUrl": "https://github.com/johndoe/ecommerce-platform",
+      "featured": true,
+      "status": "completed",
+      "createdAt": "2024-01-15"
+    },
+    {
+      "id": "2",
+      "title": "Task Management App",
+      "description": "A collaborative task management application with real-time updates, team collaboration features, and advanced filtering.",
+      "longDescription": "Built with React and Node.js, this application features real-time collaboration using Socket.io, drag-and-drop task organization, team management, file attachments, time tracking, and comprehensive reporting dashboard.",
+      "technologies": ["React", "Node.js", "Socket.io", "MongoDB", "Express", "Material-UI"],
+      "images": [
+        "/placeholder.svg?height=400&width=600",
+        "/placeholder.svg?height=400&width=600",
+        "/placeholder.svg?height=400&width=600",
+        "/placeholder.svg?height=400&width=600"
+      ],
+      "liveUrl": "https://taskmanager-demo.vercel.app",
+      "githubUrl": "https://github.com/johndoe/task-manager",
+      "featured": true,
+      "status": "completed",
+      "createdAt": "2024-02-20"
+    },
+    {
+      "id": "3",
+      "title": "Weather Analytics Dashboard",
+      "description": "A data visualization dashboard that displays weather patterns and analytics using real-time weather APIs.",
+      "longDescription": "This dashboard integrates multiple weather APIs to provide comprehensive weather analytics, including historical data visualization, weather pattern predictions, interactive maps, and customizable alerts for weather conditions.",
+      "technologies": ["Vue.js", "D3.js", "Python", "FastAPI", "Redis", "Chart.js"],
+      "images": [
+        "/placeholder.svg?height=400&width=600",
+        "/placeholder.svg?height=400&width=600",
+        "/placeholder.svg?height=400&width=600",
+        "/placeholder.svg?height=400&width=600"
+      ],
+      "liveUrl": "https://weather-analytics.vercel.app",
+      "githubUrl": "https://github.com/johndoe/weather-dashboard",
+      "featured": false,
+      "status": "completed",
+      "createdAt": "2024-03-10"
+    }
+  ],
+  "experience": [
+    {
+      "company": "Tech Solutions Inc.",
+      "position": "Senior Full Stack Developer",
+      "duration": "2022 - Present",
+      "description": "Lead development of enterprise web applications, mentor junior developers, and architect scalable solutions.",
+      "achievements": [
+        "Reduced application load time by 40% through optimization",
+        "Led a team of 5 developers on major product redesign",
+        "Implemented CI/CD pipeline reducing deployment time by 60%"
+      ]
+    },
+    {
+      "company": "StartupXYZ",
+      "position": "Full Stack Developer",
+      "duration": "2020 - 2022",
+      "description": "Developed and maintained multiple client projects using modern web technologies.",
+      "achievements": [
+        "Built 15+ responsive web applications",
+        "Integrated payment systems and third-party APIs",
+        "Improved code quality through testing and code reviews"
+      ]
+    }
+  ],
+  "education": [
+    {
+      "institution": "University of Technology",
+      "degree": "Bachelor of Science in Computer Science",
+      "duration": "2016 - 2020",
+      "gpa": "3.8/4.0"
+    }
+  ],
+  "testimonials": [
+    {
+      "name": "Sarah Johnson",
+      "position": "Product Manager at Tech Solutions Inc.",
+      "content": "John is an exceptional developer who consistently delivers high-quality solutions. His attention to detail and problem-solving skills are outstanding.",
+      "avatar": "/placeholder.svg?height=60&width=60"
+    },
+    {
+      "name": "Mike Chen",
+      "position": "CTO at StartupXYZ",
+      "content": "Working with John was a pleasure. He's not only technically skilled but also great at communicating complex ideas to non-technical stakeholders.",
+      "avatar": "/placeholder.svg?height=60&width=60"
+    }
+  ],
+  "learning": {
+    "currentLearning": [
+      {
+        "title": "Problem Solving with C/C++",
+        "description": "Currently focusing on improving algorithmic thinking and problem-solving skills using C and C++. Working through data structures, algorithms, and competitive programming challenges.",
+        "tags": ["Data Structures", "Algorithms", "C", "C++", "Competitive Programming"]
+      }
+    ],
+    "futureGoals": [
+      {
+        "title": "AI Product Development",
+        "description": "Working towards developing AI-powered products that solve real-world problems. Learning machine learning fundamentals and exploring AI frameworks to build innovative solutions.",
+        "tags": ["Machine Learning", "AI Integration", "Python", "TensorFlow", "Product Development"]
+      },
+      {
+        "title": "Advanced Full Stack Development",
+        "description": "Continuously improving my full stack development skills with a focus on scalable architecture, microservices, and cloud infrastructure. Aiming to build enterprise-level applications.",
+        "tags": ["Microservices", "AWS", "Docker", "Kubernetes", "System Design"]
+      }
+    ],
+    "codingProfiles": [
+      {
+        "platform": "LeetCode",
+        "username": "@mohebullamiazi",
+        "url": "https://leetcode.com/mohebullamiazi",
+        "icon": "code"
+      },
+      {
+        "platform": "HackerRank",
+        "username": "@mohibullamiazi",
+        "url": "https://hackerrank.com/mohibullamiazi",
+        "icon": "terminal"
+      },
+      {
+        "platform": "Codeforces",
+        "username": "@mohibullamiazi",
+        "url": "https://codeforces.com/profile/mohibullamiazi",
+        "icon": "chart"
+      }
+    ]
+  }
+}
