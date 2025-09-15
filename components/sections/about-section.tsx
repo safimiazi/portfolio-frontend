@@ -2,30 +2,25 @@
 
 import { useEffect, useRef, useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
-import { getPortfolioData } from "@/lib/portfolio-data"
+import Image from "next/image"
 
-export function AboutSection() {
+export function AboutSection({ profile }: any) {
   const [isVisible, setIsVisible] = useState(false)
   const sectionRef = useRef<HTMLElement>(null)
-  const portfolioData = getPortfolioData()
-  const { personal, education } = portfolioData
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true)
-        }
-      },
-      { threshold: 0.1 },
-    )
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current)
-    }
-
-    return () => observer.disconnect()
+    setIsVisible(true)
   }, [])
+
+  // Build education array dynamically
+  const education = [
+    {
+      degree: profile.education,
+      institution: profile.university,
+      duration: `${profile.universityStart} - ${profile.universityEnd}`,
+      gpa: profile.gpa,
+    },
+  ]
 
   return (
     <section id="about" ref={sectionRef} className="py-20 bg-muted/30">
@@ -48,9 +43,11 @@ export function AboutSection() {
               isVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-10"
             }`}
           >
+    
+
             <h3 className="text-2xl font-semibold mb-6">My Journey</h3>
             <div className="space-y-4 text-muted-foreground">
-              <p className="text-pretty">{personal.bio}</p>
+              <p className="text-pretty">{profile.bio}</p>
               <p className="text-pretty">
                 I believe in writing clean, maintainable code and creating user experiences that make a difference. My
                 approach combines technical expertise with creative problem-solving to deliver solutions that exceed
@@ -100,15 +97,30 @@ export function AboutSection() {
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Location</span>
-                    <span>{personal.location}</span>
+                    <span>{profile.location}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Email</span>
-                    <span className="text-primary">{personal.email}</span>
+                    <span className="text-primary">{profile.email}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Phone</span>
-                    <span>{personal.phone}</span>
+                    <span>{profile.phone}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Experience</span>
+                    <span>{profile.experience}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Resume</span>
+                    <a
+                      href={profile.resumeLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                    >
+                      View Resume
+                    </a>
                   </div>
                 </div>
               </CardContent>

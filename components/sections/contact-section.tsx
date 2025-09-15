@@ -11,10 +11,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Mail, Phone, MapPin, Send } from "lucide-react"
 import { getPortfolioData } from "@/lib/portfolio-data"
 
-export function ContactSection() {
+export function ContactSection({profile}: any) {
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const portfolioData = getPortfolioData()
-  const { personal } = portfolioData
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -53,7 +51,7 @@ export function ContactSection() {
                 </div>
                 <div>
                   <p className="font-medium">Email</p>
-                  <p className="text-muted-foreground">{personal.email}</p>
+                  <p className="text-muted-foreground">{profile?.email}</p>
                 </div>
               </div>
 
@@ -63,7 +61,7 @@ export function ContactSection() {
                 </div>
                 <div>
                   <p className="font-medium">Phone</p>
-                  <p className="text-muted-foreground">{personal.phone}</p>
+                  <p className="text-muted-foreground">{profile?.phone}</p>
                 </div>
               </div>
 
@@ -73,7 +71,7 @@ export function ContactSection() {
                 </div>
                 <div>
                   <p className="font-medium">Location</p>
-                  <p className="text-muted-foreground">{personal.location}</p>
+                  <p className="text-muted-foreground">{profile?.location}</p>
                 </div>
               </div>
             </div>

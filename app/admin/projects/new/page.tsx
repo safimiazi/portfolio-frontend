@@ -60,7 +60,7 @@ export default function NewProjectPage() {
   }
 
   return (
-    <AdminLayout>
+  
       <div className="space-y-6 max-w-6xl">
         {/* Header */}
         <div className="flex items-center gap-4">
@@ -271,6 +271,6 @@ export default function NewProjectPage() {
           </Button>
         </div>
       </div>
-    </AdminLayout>
+  
   )
 }

@@ -1,124 +1,69 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { ExternalLink, Github } from "lucide-react"
-import { getFeaturedProjects } from "@/lib/portfolio-data"
-import { EnhancedImageSlider } from "@/components/enhanced-image-slider"
 
-export function ProjectsSection() {
-  const [isVisible, setIsVisible] = useState(false)
-  const sectionRef = useRef<HTMLElement>(null)
-  const featuredProjects = getFeaturedProjects()
+export function ProjectsSection({projects}: any) {
+ const slideshowRefs = useRef([]);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true)
-        }
-      },
-      { threshold: 0.1 },
-    )
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current)
-    }
-
-    return () => observer.disconnect()
-  }, [])
+    projects.forEach((project, index) => {
+      const imgs = slideshowRefs.current[index].children;
+      let i = 0;
+      imgs[i].style.opacity = 1;
+      const interval = setInterval(() => {
+        imgs[i].style.opacity = 0;
+        i = (i + 1) % imgs.length;
+        imgs[i].style.opacity = 1;
+      }, 3000);
+      return () => clearInterval(interval);
+    });
+  }, [projects]);
 
   return (
-    <section id="projects" ref={sectionRef} className="py-20 bg-muted/30">
+   <section id="projects" className="py-20 bg-muted/30">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div
-          className={`text-center mb-16 transition-all duration-1000 ${
-            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-          }`}
-        >
+        <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-balance">Featured Projects</h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
             A showcase of my recent work and the technologies I've used to build them
           </p>
         </div>
-
-        <div className="grid lg:grid-cols-2 gap-8">
-          {featuredProjects.map((project, index) => (
-            <Card
-              key={project.id}
-              className={`group overflow-hidden transition-all duration-1000 hover:shadow-xl hover:scale-[1.02] ${
-                isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-              }`}
-              style={{ transitionDelay: `${index * 300}ms` }}
-            >
-              <div className="relative h-48 overflow-hidden">
-                <EnhancedImageSlider
-                  images={project.images}
-                  alt={project.title}
-                  autoPlay={true}
-                  showThumbnails={false}
-                  showFullscreen={false}
-                  className="h-full"
-                />
-              </div>
-
-              <CardHeader>
-                <CardTitle className="text-xl">{project.title}</CardTitle>
-                <CardDescription className="text-pretty">{project.description}</CardDescription>
-              </CardHeader>
-
-              <CardContent className="space-y-4">
-                <div className="flex flex-wrap gap-2">
-                  {project.technologies.slice(0, 4).map((tech) => (
-                    <Badge key={tech} variant="secondary" className="text-xs">
-                      {tech}
-                    </Badge>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {projects?.map((project) => (
+            <div key={project.id} className="bg-background rounded-lg shadow-lg overflow-hidden">
+              <div className="relative w-full h-64">
+                <div className="w-full h-full overflow-hidden" ref={(el) => (slideshowRefs.current[project.id] = el)}>
+                  {project.images.map((image, index) => (
+                    <img
+                      key={index}
+                      src={image}
+                      alt={`${project.title || "Project"} image ${index + 1}`}
+                      className="absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-1000"
+                      style={{ opacity: 0, zIndex: 0 }}
+                    />
                   ))}
-                  {project.technologies.length > 4 && (
-                    <Badge variant="outline" className="text-xs">
-                      +{project.technologies.length - 4} more
-                    </Badge>
-                  )}
                 </div>
-
-                <div className="flex gap-3">
-                  <Button size="sm" className="flex-1 group">
-                    <a
-                      href={project.liveUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2"
-                    >
-                      <ExternalLink className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                      Live Demo
-                    </a>
-                  </Button>
-                  <Button size="sm" variant="outline" className="flex-1 group bg-transparent">
-                    <a
-                      href={project.githubUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2"
-                    >
-                      <Github className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                      Code
-                    </a>
-                  </Button>
+              </div>
+              <div className="p-6">
+                <h3 className="text-xl font-semibold mb-2">{project.title || "Untitled Project"}</h3>
+                <p className="text-muted-foreground mb-4">{project.shortDesc}</p>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {project.usedTechnologies.map((tech) => (
+                    <span key={tech} className="text-xs bg-muted px-2 py-1 rounded">
+                      {tech}
+                    </span>
+                  ))}
                 </div>
-              </CardContent>
-            </Card>
+                <div className="flex gap-4">
+                  <a href={project.liveLink} className="text-primary hover:underline">Live Demo</a>
+                  <a href={project.githubFrontendLink} className="text-primary hover:underline">Code</a>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
-
-        <div className="text-center mt-12">
-          <Button variant="outline" size="lg">
-            <a href="/projects" className="flex items-center gap-2">
-              View All Projects
-              <ExternalLink className="w-4 h-4" />
-            </a>
-          </Button>
+        <div className="text-center mt-8">
+          <a href="#" className="text-primary hover:underline">View All Projects</a>
         </div>
       </div>
     </section>
