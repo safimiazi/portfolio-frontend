@@ -18,12 +18,31 @@ export default function ProjectsPage() {
   const [statusFilter, setStatusFilter] = useState("all")
   const [sortBy, setSortBy] = useState("newest")
   const [isVisible, setIsVisible] = useState(false)
+  const [projects, setProjects] = useState()
+  const [loadingProjects, setLoadingProjects] = useState(true)
 
-  const portfolioData = getPortfolioData()
-  const { projects } = portfolioData
 
   useEffect(() => {
     setIsVisible(true)
+  }, [])
+
+
+  // Fetch projects
+  useEffect(() => {
+    async function fetchProjects() {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/projects/get-all-project-for-showcase?page=1&limit=10&order=desc&featured=false`
+        )
+        const data = await res.json()
+        setProjects(data) // assuming NestJS wraps it in { data: { items, ... } }
+      } catch (error) {
+        console.error("Failed to fetch projects:", error)
+      } finally {
+        setLoadingProjects(false)
+      }
+    }
+    fetchProjects()
   }, [])
 
   // Filter and sort projects
@@ -58,9 +77,8 @@ export default function ProjectsPage() {
         <section className="py-16 bg-muted/30">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div
-              className={`text-center transition-all duration-1000 ${
-                isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-              }`}
+              className={`text-center transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+                }`}
             >
               <h1 className="text-4xl sm:text-5xl font-bold mb-4 text-balance">All Projects</h1>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
@@ -74,9 +92,8 @@ export default function ProjectsPage() {
         <section className="py-8 border-b">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div
-              className={`transition-all duration-1000 delay-300 ${
-                isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-              }`}
+              className={`transition-all duration-1000 delay-300 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+                }`}
             >
               <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
                 <div className="flex flex-col sm:flex-row gap-4 flex-1">
@@ -130,9 +147,8 @@ export default function ProjectsPage() {
               {filteredProjects.map((project, index) => (
                 <Card
                   key={project.id}
-                  className={`group overflow-hidden transition-all duration-1000 hover:shadow-xl hover:scale-[1.02] ${
-                    isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-                  }`}
+                  className={`group overflow-hidden transition-all duration-1000 hover:shadow-xl hover:scale-[1.02] ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+                    }`}
                   style={{ transitionDelay: `${index * 150}ms` }}
                 >
                   <Link href={`/projects/${project.id}`}>
