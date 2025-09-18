@@ -6,21 +6,19 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Upload, X, Plus, LinkIcon, ImageIcon } from "lucide-react"
+import { Upload, X, Plus, ImageIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
 
 interface ImageUploadProps {
-  images: (File | string)[]
-  onImagesChange: (images: (File | string)[]) => void
+  images: File[]
+  onImagesChange: (images: File[]) => void
   maxImages?: number
   className?: string
 }
 
-export function ImageUpload({ images, onImagesChange, maxImages = 10, className }: ImageUploadProps) {
+export function ImageUploadWithFile({ images, onImagesChange, maxImages = 10, className }: ImageUploadProps) {
   const [dragActive, setDragActive] = useState(false)
-  const [urlInput, setUrlInput] = useState("")
-  const [showUrlInput, setShowUrlInput] = useState(false)
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -43,27 +41,7 @@ export function ImageUpload({ images, onImagesChange, maxImages = 10, className 
     const fileArray = Array.from(files)
     const remainingSlots = maxImages - images.length
     const filesToAdd = fileArray.slice(0, remainingSlots).filter(file => file.type.startsWith("image/"))
-
-    // Convert all files to base64 and then update once
-    const readers = filesToAdd.map(file => {
-      return new Promise<string | File>((resolve) => {
-        const reader = new FileReader()
-        reader.onload = e => resolve(e.target?.result || file as any)
-        reader.readAsDataURL(file)
-      })
-    })
-
-    Promise.all(readers).then(results => {
-      onImagesChange([...images, ...results])
-    })
-  }
-
-  const addImageFromUrl = () => {
-    if (urlInput.trim() && images.length < maxImages) {
-      onImagesChange([...images, urlInput.trim()])
-      setUrlInput("")
-      setShowUrlInput(false)
-    }
+    onImagesChange([...images, ...filesToAdd])
   }
 
   const removeImage = (index: number) => {
@@ -109,26 +87,15 @@ export function ImageUpload({ images, onImagesChange, maxImages = 10, className 
             </p>
 
             {images.length < maxImages && (
-              <div className="flex flex-col sm:flex-row gap-2 justify-center">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => document.getElementById("file-upload")?.click()}
-                  className="group"
-                >
-                  <ImageIcon className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
-                  Choose Files
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setShowUrlInput(!showUrlInput)}
-                  className="group"
-                >
-                  <LinkIcon className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
-                  Add URL
-                </Button>
-              </div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => document.getElementById("file-upload")?.click()}
+                className="mt-2 group"
+              >
+                <ImageIcon className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
+                Choose Files
+              </Button>
             )}
 
             <input
@@ -143,33 +110,11 @@ export function ImageUpload({ images, onImagesChange, maxImages = 10, className 
         </CardContent>
       </Card>
 
-      {/* URL Input */}
-      {showUrlInput && (
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex gap-2">
-              <Input
-                placeholder="https://example.com/image.jpg"
-                value={urlInput}
-                onChange={(e) => setUrlInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && addImageFromUrl()}
-              />
-              <Button onClick={addImageFromUrl} disabled={!urlInput.trim()}>
-                Add
-              </Button>
-              <Button variant="outline" onClick={() => setShowUrlInput(false)}>
-                Cancel
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       {/* Image Preview Grid */}
       {images.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {images.map((img, index) => {
-            const src = typeof img === "string" ? img : URL.createObjectURL(img)
+          {images.map((file, index) => {
+            const src = URL.createObjectURL(file)
             return (
               <Card key={index} className="group relative overflow-hidden">
                 <CardContent className="p-2">

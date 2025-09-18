@@ -1,20 +1,23 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { useRouter, useParams } from "next/navigation"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, Plus, Save, X } from "lucide-react"
-import Link from "next/link"
-import { EnhancedImageSlider } from "@/components/enhanced-image-slider"
 import { ImageUploadWithFile } from "@/components/image-upload-with-file"
-import { useRouter } from "next/navigation"
 
-export default function NewProjectPage() {
+export default function EditProjectPage() {
+  const router = useRouter()
+  const params = useParams()
+  const projectId = params.id
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -22,13 +25,14 @@ export default function NewProjectPage() {
     technologies: [] as string[],
     images: [] as File[],
     liveUrl: "",
-    githubFrontendLink: "",
-    githubBackendLink: "",
+    githubFrontendURL: "",
+    githubBackendURL: "",
+
     featured: false,
     status: "in-progress" as "completed" | "in-progress" | "planned",
   })
-
   const [newTech, setNewTech] = useState("")
+  const [loading, setLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
 
   const handleInputChange = (field: string, value: any) => {
@@ -52,51 +56,85 @@ export default function NewProjectPage() {
     }))
   }
 
-  const navigate = useRouter()
+  // Fetch project details
+  useEffect(() => {
+    async function fetchProject() {
+      try {
+        setLoading(true)
+        const token = localStorage.getItem("accessToken")
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/projects/${projectId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        const data = await res.json()
+        if (res.ok) {
+          setFormData({
+            title: data.title || "",
+            description: data.shortDesc || "",
+            longDescription: data.detailsDesc || "",
+            technologies: data.usedTechnologies || [],
+            images: [], // Use File[] via upload, URLs not editable
+            liveUrl: data.liveLink || "",
+            githubFrontendURL: data.githubFrontendLink || "",
+            githubBackendURL: data.githubBackendURL || "",
 
- const handleSave = async () => {
-  setIsSaving(true)
-  try {
-    const token = localStorage.getItem("accessToken")
-    const payload = new FormData()
-    payload.append("title", formData.title)
-    payload.append("shortDesc", formData.description)
-    payload.append("detailsDesc", formData.longDescription)
-    payload.append("status", formData.status)
-    payload.append("isFeatured", String(formData.featured))
-    payload.append("usedTechnologies", JSON.stringify(formData.technologies))
-    payload.append("liveLink", formData.liveUrl)
-    payload.append("githubFrontendLink", formData.githubFrontendLink)
-    payload.append("githubBackendLink", formData.githubBackendLink)
-
-    formData.images.forEach((file) => {
-      payload.append("images", file)
-    })
-
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/projects/create-project`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`, // ❌ Do NOT set Content-Type manually
-      },
-      body: payload,
-    })
-
-    const data = await res.json()
-    if (res.ok) {
-      alert("Project created successfully!")
-      navigate.push("/admin/projects")
-    } else {
-      console.error("Error creating project:", data)
-      alert(data.message || "Failed to create project")
+            featured: data.isFeatured || false,
+            status: data.status || "in-progress",
+          })
+        } else {
+          alert(data.message || "Failed to fetch project")
+        }
+      } catch (err) {
+        console.error(err)
+        alert("Something went wrong")
+      } finally {
+        setLoading(false)
+      }
     }
-  } catch (err) {
-    console.error(err)
-    alert("Something went wrong")
-  } finally {
-    setIsSaving(false)
-  }
-}
 
+    fetchProject()
+  }, [projectId])
+
+  const handleUpdate = async () => {
+    setIsSaving(true)
+    try {
+      const token = localStorage.getItem("accessToken")
+      const payload = new FormData()
+      payload.append("title", formData.title)
+      payload.append("shortDesc", formData.description)
+      payload.append("detailsDesc", formData.longDescription)
+      payload.append("status", formData.status)
+      payload.append("isFeatured", String(formData.featured))
+      payload.append("usedTechnologies", JSON.stringify(formData.technologies))
+      payload.append("liveLink", formData.liveUrl)
+      payload.append("githubFrontendLink", formData.githubFrontendURL)
+      payload.append("githubBackendLink", formData.githubBackendURL)
+
+      formData.images.forEach((file) => {
+        payload.append("images", file)
+      })
+
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/projects/${projectId}`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}` },
+        body: payload,
+      })
+
+      const data = await res.json()
+      if (res.ok) {
+        alert("Project updated successfully!")
+        router.push("/admin/projects")
+      } else {
+        alert(data.message || "Failed to update project")
+      }
+    } catch (err) {
+      console.error(err)
+      alert("Something went wrong")
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  if (loading) return <div>Loading project details...</div>
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
@@ -109,8 +147,8 @@ export default function NewProjectPage() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-3xl font-bold">Add New Project</h1>
-          <p className="text-muted-foreground">Create a new project for your portfolio</p>
+          <h1 className="text-3xl font-bold">Edit Project</h1>
+          <p className="text-muted-foreground">Update details for your project</p>
         </div>
       </div>
 
@@ -243,20 +281,20 @@ export default function NewProjectPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="githubFrontendLink">GitHub Repository</Label>
+                <Label htmlFor="githubFrontendURL">GitHub Frontend Repository</Label>
                 <Input
-                  id="githubFrontendLink"
-                  value={formData.githubFrontendLink}
-                  onChange={(e) => handleInputChange("githubFrontendLink", e.target.value)}
+                  id="githubFrontendURL"
+                  value={formData.githubFrontendURL}
+                  onChange={(e) => handleInputChange("githubFrontendURL", e.target.value)}
                   placeholder="https://github.com/username/project"
                 />
               </div>
-                   <div className="space-y-2">
-                <Label htmlFor="githubBackendLink">GitHub Backend Repository</Label>
+              <div className="space-y-2">
+                <Label htmlFor="githubBackendURL">GitHub Backend Repository</Label>
                 <Input
-                  id="githubBackendLink"
-                  value={formData.githubBackendLink}
-                  onChange={(e) => handleInputChange("githubBackendLink", e.target.value)}
+                  id="githubBackendURL"
+                  value={formData.githubBackendURL}
+                  onChange={(e) => handleInputChange("githubBackendURL", e.target.value)}
                   placeholder="https://github.com/username/project"
                 />
               </div>
@@ -264,7 +302,7 @@ export default function NewProjectPage() {
           </Card>
         </div>
 
-        {/* Right Column: Images and Preview */}
+        {/* Right Column: Images */}
         <div className="space-y-6">
           <Card>
             <CardHeader>
@@ -279,29 +317,6 @@ export default function NewProjectPage() {
               />
             </CardContent>
           </Card>
-
-          {formData.images.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Preview</CardTitle>
-                <CardDescription>How your project will appear in the portfolio</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <EnhancedImageSlider
-                  images={formData.images.map((img) =>
-                    typeof img === "string" ? img : URL.createObjectURL(img)
-                  )}
-                  alt={formData.title || "Project preview"}
-                  autoPlay={true}
-                  autoPlayInterval={3000}
-                  showThumbnails={true}
-                  showCounter={true}
-                  showFullscreen={true}
-                />
-
-              </CardContent>
-            </Card>
-          )}
         </div>
       </div>
 
@@ -310,13 +325,13 @@ export default function NewProjectPage() {
         <Link href="/admin/projects">
           <Button variant="outline">Cancel</Button>
         </Link>
-        <Button onClick={handleSave} disabled={isSaving} size="lg" className="group">
+        <Button onClick={handleUpdate} disabled={isSaving} size="lg" className="group">
           {isSaving ? (
-            "Saving..."
+            "Updating..."
           ) : (
             <>
               <Save className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
-              Save Project
+              Update Project
             </>
           )}
         </Button>
