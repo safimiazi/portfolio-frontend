@@ -35,12 +35,12 @@ export default function HomePage() {
     fetchProfile();
   }, []);
 
-   // Fetch projects
+  // Fetch projects
   useEffect(() => {
     async function fetchProjects() {
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/projects/get-all-project-for-showcase?page=1&limit=10&order=desc&featured=false`
+          `${process.env.NEXT_PUBLIC_API_URL}/projects/get-all-project-for-showcase?page=1&limit=10&order=desc&featured=true`
         )
         const data = await res.json()
         setProjects(data) // assuming NestJS wraps it in { data: { items, ... } }
@@ -100,7 +100,47 @@ export default function HomePage() {
 
 
   if (!profile) {
-    return <div className="p-10 text-center text-red-500">No profile found.</div>;
+    return <div className="flex items-center justify-center min-h-[260px] p-6">
+      <div className="w-full max-w-2xl bg-white/80 dark:bg-slate-800/70 backdrop-blur-md rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div className="flex flex-col md:flex-row items-center gap-6 p-6 md:p-8">
+          {/* Illustration */}
+          <div className="flex-shrink-0">
+            <div className="w-36 h-36 md:w-40 md:h-40 bg-gradient-to-br from-sky-400 to-indigo-600 rounded-xl flex items-center justify-center shadow-inner">
+              {/* simple code / profile icon */}
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-20 h-20 text-white opacity-95" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke="none" d="M0 0h24v24H0z" />
+                <path d="M12 12a4 4 0 1 0 -4 -4a4 4 0 0 0 4 4z" strokeWidth="1.5" />
+                <path d="M6 20c1.333 -2 3.333 -3 6 -3s4.667 1 6 3" strokeWidth="1.5" />
+              </svg>
+            </div>
+          </div>
+
+
+          {/* Text */}
+          <div className="flex-1 text-center md:text-left">
+            <h3 className="text-2xl md:text-3xl font-semibold text-slate-900 dark:text-white">Profile paoa jaini</h3>
+            <p className="mt-2 text-sm md:text-base text-slate-600 dark:text-slate-300">
+              Mone hocche tomar profile ekhono create hoy ni. Profile thakle ei jaygay tomar naam, designation, experience
+              ebong onno important information dekhabe.
+            </p>
+
+
+            <div className="mt-5 flex flex-col sm:flex-row items-center sm:items-stretch gap-3 sm:gap-4 justify-center md:justify-start">
+
+
+
+
+            </div>
+
+
+            <p className="mt-4 text-xs text-slate-400">
+              Pro tip: Profile complete rakha job/clients er jonno valo. <span className="font-medium">Portfolio</span> and
+              <span className="font-medium"> GitHub</span> link add korte paro.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
   }
 
   return (
@@ -110,7 +150,10 @@ export default function HomePage() {
         <HeroSection profile={profile} />
         <AboutSection profile={profile} />
         <SkillsSection />
-        <ProjectsSection projects={projects} />
+        {
+          projects && <ProjectsSection projects={projects} />
+
+        }
         <ExperienceSection />
         <LearningSection />
         <TestimonialsSection />

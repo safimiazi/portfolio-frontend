@@ -1,45 +1,115 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Plus, Edit, Trash2, Quote, User, Briefcase } from "lucide-react"
-import { getPortfolioData } from "@/lib/portfolio-data"
+
+interface Testimonial {
+  id?: number
+  name: string
+  position: string
+  content: string
+  avatar?: string
+}
 
 export default function TestimonialsAdminPage() {
-  const data = getPortfolioData()
-  const [testimonials, setTestimonials] = useState(data.testimonials)
+      const token = localStorage.getItem("accessToken")
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([])
   const [isEditing, setIsEditing] = useState<number | null>(null)
-  const [newTestimonial, setNewTestimonial] = useState({
+  const [newTestimonial, setNewTestimonial] = useState<Testimonial>({
     name: "",
     position: "",
     content: "",
     avatar: "",
   })
+  const [newAvatarFile, setNewAvatarFile] = useState<File | null>(null)
+  const [editAvatarFiles, setEditAvatarFiles] = useState<Record<number, File>>({})
 
-  const handleAddTestimonial = () => {
-    if (newTestimonial.name && newTestimonial.content) {
-      setTestimonials([
-        ...testimonials,
-        {
-          ...newTestimonial,
-          avatar: newTestimonial.avatar || `/placeholder.svg?height=60&width=60`,
-        },
-      ])
-      setNewTestimonial({
-        name: "",
-        position: "",
-        content: "",
-        avatar: "",
+  // ✅ Fetch testimonials
+  const fetchTestimonials = async () => {
+    try {
+      const res = await fetch(`http://localhost:5000/testimonials/get-all?limit=100&page=1`, {
+        headers: { Authorization: `Bearer ${token}` },
       })
+      const data = await res.json()
+      setTestimonials(data.data.items)
+    } catch (err) {
+      console.error(err)
     }
   }
 
-  const handleDeleteTestimonial = (index: number) => {
-    setTestimonials(testimonials.filter((_, i) => i !== index))
+  useEffect(() => {
+    fetchTestimonials()
+  }, [])
+
+  // ✅ Add testimonial with avatar
+  const handleAddTestimonial = async () => {
+    if (!newTestimonial.name || !newTestimonial.content) return alert("Name & Content required")
+    try {
+      const form = new FormData()
+      form.append("name", newTestimonial.name)
+      form.append("position", newTestimonial.position || "")
+      form.append("content", newTestimonial.content)
+      if (newAvatarFile) form.append("avatar", newAvatarFile)
+
+      const res = await fetch(`http://localhost:5000/testimonials/create`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: form,
+      })
+      const data = await res.json()
+      setTestimonials([...testimonials, data.data])
+      setNewTestimonial({ name: "", position: "", content: "", avatar: "" })
+      setNewAvatarFile(null)
+    } catch (err) {
+      console.error(err)
+      alert("Failed to add testimonial")
+    }
+  }
+
+  // ✅ Update testimonial with avatar
+  const handleUpdateTestimonial = async (id: number, index: number) => {
+    const testimonial = testimonials[index]
+    if (!testimonial) return
+    try {
+      const form = new FormData()
+      form.append("name", testimonial.name)
+      form.append("position", testimonial.position || "")
+      form.append("content", testimonial.content)
+      if (editAvatarFiles[index]) form.append("avatar", editAvatarFiles[index])
+
+      const res = await fetch(`http://localhost:5000/testimonials/${id}`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}` },
+        body: form,
+      })
+      const data = await res.json()
+      setTestimonials(testimonials.map((t) => (t.id === id ? data.data : t)))
+      setIsEditing(null)
+      setEditAvatarFiles((prev) => ({ ...prev, [index]: undefined }))
+    } catch (err) {
+      console.error(err)
+      alert("Failed to update testimonial")
+    }
+  }
+
+  // ✅ Delete testimonial
+  const handleDeleteTestimonial = async (id: number) => {
+    if (!confirm("Are you sure to delete this testimonial?")) return
+    try {
+      await fetch(`http://localhost:5000/testimonials/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      setTestimonials(testimonials.filter((t) => t.id !== id))
+    } catch (err) {
+      console.error(err)
+      alert("Failed to delete testimonial")
+    }
   }
 
   return (
@@ -82,11 +152,11 @@ export default function TestimonialsAdminPage() {
           </div>
 
           <div>
-            <label className="text-sm font-medium text-foreground mb-2 block">Avatar URL (Optional)</label>
+            <label className="text-sm font-medium text-foreground mb-2 block">Avatar (Optional)</label>
             <Input
-              placeholder="https://example.com/avatar.jpg"
-              value={newTestimonial.avatar}
-              onChange={(e) => setNewTestimonial({ ...newTestimonial, avatar: e.target.value })}
+              type="file"
+              accept="image/*"
+              onChange={(e) => e.target.files?.[0] && setNewAvatarFile(e.target.files[0])}
               className="bg-background/50"
             />
           </div>
@@ -112,45 +182,88 @@ export default function TestimonialsAdminPage() {
       <div className="grid gap-4">
         {testimonials.map((testimonial, index) => (
           <Card
-            key={index}
+            key={testimonial.id || index}
             className="bg-card/50 backdrop-blur-sm border-border/50 hover:border-primary/20 transition-all duration-300"
           >
             <CardHeader>
               <div className="flex items-start justify-between">
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 flex-1">
                   <Avatar className="h-12 w-12">
                     <AvatarImage src={testimonial.avatar || "/placeholder.svg"} alt={testimonial.name} />
                     <AvatarFallback className="bg-primary/10 text-primary">
-                      {testimonial.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
+                      {testimonial.name.split(" ").map((n) => n[0]).join("")}
                     </AvatarFallback>
                   </Avatar>
-                  <div>
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                      <User className="h-4 w-4 text-primary" />
-                      {testimonial.name}
-                    </CardTitle>
-                    <p className="text-sm text-muted-foreground flex items-center gap-1">
-                      <Briefcase className="h-3 w-3" />
-                      {testimonial.position}
-                    </p>
+
+                  <div className="flex-1">
+                    {isEditing === index ? (
+                      <div className="space-y-2">
+                        <Input
+                          value={testimonial.name}
+                          onChange={(e) => {
+                            const t = [...testimonials]
+                            t[index].name = e.target.value
+                            setTestimonials(t)
+                          }}
+                        />
+                        <Input
+                          value={testimonial.position}
+                          onChange={(e) => {
+                            const t = [...testimonials]
+                            t[index].position = e.target.value
+                            setTestimonials(t)
+                          }}
+                        />
+                        <Textarea
+                          value={testimonial.content}
+                          onChange={(e) => {
+                            const t = [...testimonials]
+                            t[index].content = e.target.value
+                            setTestimonials(t)
+                          }}
+                        />
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) =>
+                            e.target.files?.[0] &&
+                            setEditAvatarFiles((prev) => ({ ...prev, [index]: e.target.files![0] }))
+                          }
+                        />
+                        <Button onClick={() => handleUpdateTestimonial(testimonial.id!, index)} className="w-full">
+                          Save Changes
+                        </Button>
+                      </div>
+                    ) : (
+                      <>
+                        <CardTitle className="flex items-center gap-2 text-lg">
+                          <User className="h-4 w-4 text-primary" />
+                          {testimonial.name}
+                        </CardTitle>
+                        <p className="text-sm text-muted-foreground flex items-center gap-1">
+                          <Briefcase className="h-3 w-3" />
+                          {testimonial.position}
+                        </p>
+                      </>
+                    )}
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => setIsEditing(isEditing === index ? null : index)}>
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDeleteTestimonial(index)}
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
+
+                {isEditing !== index && (
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={() => setIsEditing(index)}>
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDeleteTestimonial(testimonial.id!)}
+                      className="text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
               </div>
             </CardHeader>
             <CardContent>

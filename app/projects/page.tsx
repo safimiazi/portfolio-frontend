@@ -37,7 +37,7 @@ export function ProjectsSection() {
       try {
         setLoading(true)
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/projects/get-all-project-for-showcase?page=${page}&limit=${limit}&order=${order}&featured=false`
+          `${process.env.NEXT_PUBLIC_API_URL}/projects/get-all-project-for-showcase?page=${page}&limit=${limit}&order=${order}`
         )
         const data = await res.json()
         setProjects(data.data.items)
