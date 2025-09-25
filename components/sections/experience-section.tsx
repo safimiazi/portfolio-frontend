@@ -1,32 +1,56 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { getPortfolioData } from "@/lib/portfolio-data"
 import { CheckCircle } from "lucide-react"
 
+type Experience = {
+  id: number
+  userId: number
+  role: string
+  company: string
+  startDate: string
+  endDate: string | null
+  isCurrent: boolean
+  responsibilities: string
+  achievements: string[]
+  createdAt: string
+  updatedAt: string
+}
+
 export function ExperienceSection() {
-  const [isVisible, setIsVisible] = useState(false)
-  const sectionRef = useRef<HTMLElement>(null)
-  const portfolioData = getPortfolioData()
-  const { experience } = portfolioData
+  const sectionRef = useRef<HTMLElement | null>(null)
+  const [experience, setExperience] = useState<Experience[]>([])
+  const [loadingExperience, setLoadingExperience] = useState(true)
+  const [isVisible, setIsVisible] = useState(true)
 
+  // Fetch work experience
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true)
-        }
-      },
-      { threshold: 0.1 },
-    )
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current)
+    async function fetchExperience() {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/work-experiences/get-all-showcase?page=1&limit=10&order=desc`
+        )
+        const data = await res.json()
+        setExperience(data?.data?.items || [])
+      } catch (error) {
+        console.error("Failed to fetch experience:", error)
+      } finally {
+        setLoadingExperience(false)
+      }
     }
-
-    return () => observer.disconnect()
+    fetchExperience()
   }, [])
+
+
+
+  if (loadingExperience) {
+    return (
+      <div className="py-20 text-center">
+        <p className="text-muted-foreground">Loading work experience...</p>
+      </div>
+    )
+  }
 
   return (
     <section id="experience" ref={sectionRef} className="py-20">
@@ -45,7 +69,7 @@ export function ExperienceSection() {
         <div className="max-w-4xl mx-auto space-y-8">
           {experience.map((exp, index) => (
             <Card
-              key={index}
+              key={exp.id}
               className={`transition-all duration-1000 hover:shadow-lg ${
                 isVisible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-10"
               }`}
@@ -54,14 +78,18 @@ export function ExperienceSection() {
               <CardHeader>
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                   <div>
-                    <CardTitle className="text-xl">{exp.position}</CardTitle>
+                    <CardTitle className="text-xl">{exp.role}</CardTitle>
                     <p className="text-primary font-medium">{exp.company}</p>
                   </div>
-                  <div className="text-sm text-muted-foreground">{exp.duration}</div>
+                  <div className="text-sm text-muted-foreground">
+                    {exp.isCurrent
+                      ? `${new Date(exp.startDate).getFullYear()} - Present`
+                      : `${new Date(exp.startDate).getFullYear()} - ${new Date(exp.endDate!).getFullYear()}`}
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-muted-foreground text-pretty">{exp.description}</p>
+                <p className="text-muted-foreground text-pretty">{exp.responsibilities}</p>
                 <div className="space-y-2">
                   <h4 className="font-medium">Key Achievements:</h4>
                   <ul className="space-y-2">
