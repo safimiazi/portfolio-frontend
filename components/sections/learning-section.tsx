@@ -1,18 +1,77 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Code, Target, ExternalLink, BookOpen, Zap } from "lucide-react"
-import { getPortfolioData } from "@/lib/portfolio-data"
+
+type LearningGoal = {
+  id: number
+  userId: number
+  category: "LEARNING" | "GOAL"
+  title: string
+  description: string
+  tags: string[]
+  createdAt: string
+  updatedAt: string
+}
+
+type CodingProfile = {
+  id: number
+  userId: number
+  platform: string
+  username: string
+  profileUrl: string
+  createdAt: string
+  updatedAt: string
+}
 
 export function LearningSection() {
-  const data = getPortfolioData()
-  const { learning } = data
+  const [learningGoals, setLearningGoals] = useState<LearningGoal[]>([])
+  const [codingProfiles, setCodingProfiles] = useState<CodingProfile[]>([])
+  const [loading, setLoading] = useState(true)
 
-  // Define the reusable gradient classes
-  const primaryGradientText = "bg-gradient-to-r from-primary via-primary to-primary bg-clip-text text-transparent"
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        // Learning Goals
+        const lgRes = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/learning-goals/get-all-for-showcase?page=1&limit=10&order=desc`
+        )
+        const lgData = await lgRes.json()
+        setLearningGoals(lgData?.data?.items || [])
+
+        // Coding Profiles
+        const cpRes = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/coding-profiles/get-all-for-showcase?page=1&limit=10&order=desc`
+        )
+        const cpData = await cpRes.json()
+        setCodingProfiles(cpData?.data?.items || [])
+      } catch (error) {
+        console.error("Failed to fetch data:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="py-20 text-center">
+        <p className="text-muted-foreground">Loading learning goals & coding profiles...</p>
+      </div>
+    )
+  }
+
+  const currentLearning = learningGoals.filter((goal) => goal.category === "LEARNING")
+  const futureGoals = learningGoals.filter((goal) => goal.category === "GOAL")
+
+  // gradient classes
+  const primaryGradientText =
+    "bg-gradient-to-r from-primary via-primary to-primary bg-clip-text text-transparent"
   const primaryGradientBorder = "border border-primary/20"
   const primaryGradientBg = "bg-gradient-to-br from-card/80 to-primary/5"
 
@@ -59,21 +118,28 @@ export function LearningSection() {
         </motion.div>
 
         <div className="grid lg:grid-cols-2 gap-8 mb-12">
-          {/* Current Learning */}
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={itemVariants}>
+          {/* Current Learning + Coding Profiles */}
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={itemVariants}
+          >
             <Card
               className={`h-full ${primaryGradientBg} backdrop-blur-sm ${primaryGradientBorder} hover:border-primary/40 transition-all duration-500 hover:shadow-lg hover:shadow-primary/10`}
             >
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center gap-3 text-xl">
-                  <div className={`p-3 rounded-xl ${primaryGradientBg} ${primaryGradientBorder}`}>
+                  <div
+                    className={`p-3 rounded-xl ${primaryGradientBg} ${primaryGradientBorder}`}
+                  >
                     <Code className="h-6 w-6 text-primary" />
                   </div>
                   <span className={primaryGradientText}>Current Learning</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                {learning.currentLearning.map((item, index) => (
+                {currentLearning.map((item, index) => (
                   <motion.div
                     key={index}
                     className="space-y-3 p-4 rounded-lg bg-background/50 border border-primary/10"
@@ -84,7 +150,9 @@ export function LearningSection() {
                       <BookOpen className="h-4 w-4 text-primary" />
                       {item.title}
                     </h3>
-                    <p className="text-muted-foreground leading-relaxed text-pretty">{item.description}</p>
+                    <p className="text-muted-foreground leading-relaxed text-pretty">
+                      {item.description}
+                    </p>
                     <div className="flex flex-wrap gap-2">
                       {item.tags.map((tag, tagIndex) => (
                         <Badge
@@ -100,57 +168,70 @@ export function LearningSection() {
                 ))}
 
                 {/* Coding Profiles */}
-                <div className="pt-4 border-t border-primary/20">
-                  <h4 className="text-md font-semibold mb-4 text-foreground flex items-center gap-2">
-                    <Zap className="h-4 w-4 text-primary" />
-                    Coding Profiles
-                  </h4>
-                  <div className="space-y-3">
-                    {learning.codingProfiles.map((profile, index) => (
-                      <motion.a
-                        key={index}
-                        href={profile.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`flex items-center justify-between p-4 rounded-xl ${primaryGradientBg} ${primaryGradientBorder} hover:border-primary/30 transition-all duration-300 group hover:shadow-md`}
-                        whileHover={{ scale: 1.02, x: 4 }}
-                        whileTap={{ scale: 0.98 }}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className={`p-2 rounded-lg ${primaryGradientBg} ${primaryGradientBorder} group-hover:from-primary/30 group-hover:to-primary/20 transition-all`}>
-                            <Code className="h-4 w-4 text-primary" />
+                {codingProfiles.length > 0 && (
+                  <div className="pt-4 border-t border-primary/20">
+                    <h4 className="text-md font-semibold mb-4 text-foreground flex items-center gap-2">
+                      <Zap className="h-4 w-4 text-primary" />
+                      Coding Profiles
+                    </h4>
+                    <div className="space-y-3">
+                      {codingProfiles.map((profile, index) => (
+                        <motion.a
+                          key={index}
+                          href={profile.profileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`flex items-center justify-between p-4 rounded-xl ${primaryGradientBg} ${primaryGradientBorder} hover:border-primary/30 transition-all duration-300 group hover:shadow-md`}
+                          whileHover={{ scale: 1.02, x: 4 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div
+                              className={`p-2 rounded-lg ${primaryGradientBg} ${primaryGradientBorder} group-hover:from-primary/30 group-hover:to-primary/20 transition-all`}
+                            >
+                              <Code className="h-4 w-4 text-primary" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-foreground group-hover:text-primary transition-colors">
+                                {profile.platform}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {profile.username}
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="font-medium text-foreground group-hover:text-primary transition-colors">
-                              {profile.platform}
-                            </p>
-                            <p className="text-sm text-muted-foreground">{profile.username}</p>
-                          </div>
-                        </div>
-                        <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                      </motion.a>
-                    ))}
+                          <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                        </motion.a>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
               </CardContent>
             </Card>
           </motion.div>
 
           {/* Future Goals */}
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={itemVariants}>
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={itemVariants}
+          >
             <Card
               className={`h-full ${primaryGradientBg} backdrop-blur-sm ${primaryGradientBorder} hover:border-primary/40 transition-all duration-500 hover:shadow-lg hover:shadow-primary/10`}
             >
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center gap-3 text-xl">
-                  <div className={`p-3 rounded-xl ${primaryGradientBg} ${primaryGradientBorder}`}>
+                  <div
+                    className={`p-3 rounded-xl ${primaryGradientBg} ${primaryGradientBorder}`}
+                  >
                     <Target className="h-6 w-6 text-primary" />
                   </div>
                   <span className={primaryGradientText}>Future Goals</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                {learning.futureGoals.map((goal, index) => (
+                {futureGoals.map((goal, index) => (
                   <motion.div
                     key={index}
                     className="space-y-3 p-4 rounded-lg bg-background/50 border border-primary/10"
@@ -161,7 +242,9 @@ export function LearningSection() {
                       <Target className="h-4 w-4 text-primary" />
                       {goal.title}
                     </h3>
-                    <p className="text-muted-foreground leading-relaxed text-pretty">{goal.description}</p>
+                    <p className="text-muted-foreground leading-relaxed text-pretty">
+                      {goal.description}
+                    </p>
                     <div className="flex flex-wrap gap-2">
                       {goal.tags.map((tag, tagIndex) => (
                         <Badge
@@ -181,7 +264,13 @@ export function LearningSection() {
         </div>
 
         {/* Follow Learning Journey Button */}
-        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={itemVariants} className="text-center">
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={itemVariants}
+          className="text-center"
+        >
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button
               size="lg"
