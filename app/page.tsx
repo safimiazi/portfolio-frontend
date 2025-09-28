@@ -5,11 +5,11 @@ import { SkillsSection } from "@/components/sections/skills-section"
 import { ProjectsSection } from "@/components/sections/projects-section"
 import { ExperienceSection } from "@/components/sections/experience-section"
 import { LearningSection } from "@/components/sections/learning-section"
-import { TestimonialsSection } from "@/components/sections/testimonials-section"
 import { ContactSection } from "@/components/sections/contact-section"
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
 import { useEffect, useState } from "react"
+import LoadingComponent from "@/components/sections/LoadingComponent"
 
 export default function HomePage() {
   const [profile, setProfile] = useState<any>(null)
@@ -55,47 +55,7 @@ export default function HomePage() {
 
 
   if (loadingProfile || loadingProjects) {
-    return (
-      <div className="p-16 flex flex-col items-center justify-center space-y-8">
-        {/* Avatar skeleton */}
-        <div className="relative w-40 h-40 rounded-full overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-gray-300 via-gray-200 to-gray-300 animate-[shimmer_1.5s_infinite]"></div>
-        </div>
-
-        {/* Name skeleton */}
-        <div className="w-64 h-8 rounded-lg overflow-hidden relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-gray-300 via-gray-200 to-gray-300 animate-[shimmer_1.5s_infinite]"></div>
-        </div>
-
-        {/* Designation skeleton */}
-        <div className="w-48 h-5 rounded-lg overflow-hidden relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-gray-300 via-gray-200 to-gray-300 animate-[shimmer_1.5s_infinite]"></div>
-        </div>
-
-        {/* Bio skeleton */}
-        <div className="space-y-3 w-96">
-          <div className="h-4 rounded-lg overflow-hidden relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-gray-300 via-gray-200 to-gray-300 animate-[shimmer_1.5s_infinite]"></div>
-          </div>
-          <div className="h-4 rounded-lg overflow-hidden relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-gray-300 via-gray-200 to-gray-300 animate-[shimmer_1.5s_infinite]"></div>
-          </div>
-          <div className="h-4 rounded-lg overflow-hidden relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-gray-300 via-gray-200 to-gray-300 animate-[shimmer_1.5s_infinite]"></div>
-          </div>
-        </div>
-
-        {/* Action buttons skeleton */}
-        <div className="flex space-x-6 mt-6">
-          <div className="w-40 h-10 rounded-full bg-gray-300 overflow-hidden relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-gray-300 via-gray-200 to-gray-300 animate-[shimmer_1.5s_infinite]"></div>
-          </div>
-          <div className="w-40 h-10 rounded-full bg-gray-300 overflow-hidden relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-gray-300 via-gray-200 to-gray-300 animate-[shimmer_1.5s_infinite]"></div>
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingComponent/>
   }
 
 
@@ -154,7 +114,7 @@ export default function HomePage() {
         }
         <ExperienceSection />
         <LearningSection />
-        <TestimonialsSection />
+        {/* <TestimonialsSection /> */}
         <ContactSection profile={profile} />
       </main>
       <Footer profile={profile} />

@@ -1,8 +1,9 @@
 "use client"
 
 import { useEffect, useState, useRef } from "react"
+import { motion } from "framer-motion"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { CheckCircle } from "lucide-react"
+import { Calendar, MapPin } from "lucide-react"
 
 type Experience = {
   id: number
@@ -13,7 +14,7 @@ type Experience = {
   endDate: string | null
   isCurrent: boolean
   responsibilities: string
-  achievements: string[]
+  technologies: string[]
   createdAt: string
   updatedAt: string
 }
@@ -22,7 +23,6 @@ export function ExperienceSection() {
   const sectionRef = useRef<HTMLElement | null>(null)
   const [experience, setExperience] = useState<Experience[]>([])
   const [loadingExperience, setLoadingExperience] = useState(true)
-  const [isVisible, setIsVisible] = useState(true)
 
   // Fetch work experience
   useEffect(() => {
@@ -42,8 +42,6 @@ export function ExperienceSection() {
     fetchExperience()
   }, [])
 
-
-
   if (loadingExperience) {
     return (
       <div className="py-20 text-center">
@@ -53,57 +51,92 @@ export function ExperienceSection() {
   }
 
   return (
-    <section id="experience" ref={sectionRef} className="py-20">
+    <section
+      id="experience"
+      ref={sectionRef}
+      className="py-20 relative bg-background text-foreground"
+    >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div
-          className={`text-center mb-16 transition-all duration-1000 ${
-            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-          }`}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="text-center mb-16"
         >
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-balance">Work Experience</h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4">Work Experience</h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             My professional journey and the impact I've made at each organization
           </p>
-        </div>
+        </motion.div>
 
-        <div className="max-w-4xl mx-auto space-y-8">
-          {experience.map((exp, index) => (
-            <Card
-              key={exp.id}
-              className={`transition-all duration-1000 hover:shadow-lg ${
-                isVisible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-10"
-              }`}
-              style={{ transitionDelay: `${index * 300}ms` }}
-            >
-              <CardHeader>
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                  <div>
+        <div className="relative max-w-4xl mx-auto">
+          {/* Timeline vertical line */}
+          <div className="absolute left-1/2 top-0 bottom-0 w-px bg-border transform -translate-x-1/2" />
+
+          <div className="space-y-12">
+            {experience.map((exp, index) => (
+              <motion.div
+                key={exp.id}
+                initial={{ opacity: 0, x: index % 2 === 0 ? -80 : 80 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, delay: index * 0.2 }}
+                className={`relative flex ${
+                  index % 2 === 0 ? "justify-start" : "justify-end"
+                }`}
+              >
+                {/* Timeline dot */}
+                <span className="absolute left-1/2 transform -translate-x-1/2 w-4 h-4 rounded-full bg-primary ring-4 ring-background" />
+
+                <Card className="w-full sm:w-[calc(50%-2rem)] bg-card border border-border shadow-xl rounded-xl overflow-hidden">
+                  <CardHeader>
                     <CardTitle className="text-xl">{exp.role}</CardTitle>
                     <p className="text-primary font-medium">{exp.company}</p>
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {exp.isCurrent
-                      ? `${new Date(exp.startDate).getFullYear()} - Present`
-                      : `${new Date(exp.startDate).getFullYear()} - ${new Date(exp.endDate!).getFullYear()}`}
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-muted-foreground text-pretty">{exp.responsibilities}</p>
-                <div className="space-y-2">
-                  <h4 className="font-medium">Key Achievements:</h4>
-                  <ul className="space-y-2">
-                    {exp.achievements.map((achievement, achievementIndex) => (
-                      <li key={achievementIndex} className="flex items-start gap-2">
-                        <CheckCircle className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                        <span className="text-sm text-muted-foreground text-pretty">{achievement}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex flex-col gap-1 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4" />
+                        <span>
+                          {new Date(exp.startDate).toLocaleString("default", {
+                            month: "short",
+                            year: "numeric",
+                          })}{" "}
+                          –{" "}
+                          {exp.isCurrent
+                            ? "Present"
+                            : new Date(exp.endDate!).toLocaleString("default", {
+                                month: "short",
+                                year: "numeric",
+                              })}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4" />
+                        <span>Dhaka, Bangladesh</span>
+                      </div>
+                    </div>
+
+                    <p className="text-muted-foreground text-sm leading-relaxed">
+                      {exp.responsibilities}
+                    </p>
+
+                    <div className="flex flex-wrap gap-2">
+                      {exp.technologies?.map((tech, i) => (
+                        <span
+                          key={i}
+                          className="px-3 py-1 text-xs font-medium rounded-lg bg-primary/10 text-primary border border-primary/20"
+                        >
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

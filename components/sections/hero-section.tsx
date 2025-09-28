@@ -7,10 +7,40 @@ import Image from "next/image";
 
 export function HeroSection({ profile }: { profile: any }) {
   const [isVisible, setIsVisible] = useState(false);
+  const [typedDesignation, setTypedDesignation] = useState("");
+
+ const [isDeleting, setIsDeleting] = useState(false);
+  const [index, setIndex] = useState(0);
+
+  const designation = profile.designation;
 
   useEffect(() => {
     setIsVisible(true);
-  }, []);
+
+    const speed = 100; // typing speed in ms
+    const pause = 1500; // pause before deleting
+
+    const handleTyping = () => {
+      if (!isDeleting) {
+        setTypedDesignation(designation.slice(0, index + 1));
+        setIndex(index + 1);
+
+        if (index + 1 === designation.length) {
+          setTimeout(() => setIsDeleting(true), pause);
+        }
+      } else {
+        setTypedDesignation(designation.slice(0, index - 1));
+        setIndex(index - 1);
+
+        if (index - 1 === 0) {
+          setIsDeleting(false);
+        }
+      }
+    };
+
+    const interval = setInterval(handleTyping, speed);
+    return () => clearInterval(interval);
+  }, [index, isDeleting, designation]);
 
   return (
     <section
@@ -28,9 +58,7 @@ export function HeroSection({ profile }: { profile: any }) {
           {/* Profile Image */}
           <div
             className={`mb-8 transition-all duration-1000 ${
-              isVisible
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-10"
+              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
             }`}
           >
             <div className="relative w-32 h-32 mx-auto mb-6">
@@ -47,9 +75,7 @@ export function HeroSection({ profile }: { profile: any }) {
           {/* Main Content */}
           <div
             className={`transition-all duration-1000 delay-300 ${
-              isVisible
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-10"
+              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
             }`}
           >
             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold mb-6 text-balance">
@@ -57,8 +83,10 @@ export function HeroSection({ profile }: { profile: any }) {
               <span className="text-primary">{profile.name}</span>
             </h1>
 
+            {/* Typing Designation */}
             <h2 className="text-xl sm:text-2xl lg:text-3xl text-muted-foreground mb-8 text-balance">
-              {profile.designation}
+              {typedDesignation}
+              <span className="border-r-2 border-muted-foreground animate-pulse ml-1" />
             </h2>
 
             <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto mb-12 text-pretty">
@@ -69,9 +97,7 @@ export function HeroSection({ profile }: { profile: any }) {
           {/* Action Buttons */}
           <div
             className={`flex flex-col sm:flex-row gap-4 justify-center items-center mb-12 transition-all duration-1000 delay-500 ${
-              isVisible
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-10"
+              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
             }`}
           >
             <Button size="lg" className="group">
@@ -92,9 +118,7 @@ export function HeroSection({ profile }: { profile: any }) {
           {/* Social Links */}
           <div
             className={`flex justify-center space-x-6 mb-12 transition-all duration-1000 delay-700 ${
-              isVisible
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-10"
+              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
             }`}
           >
             {profile.github && (
@@ -128,9 +152,7 @@ export function HeroSection({ profile }: { profile: any }) {
           {/* Scroll Indicator */}
           <div
             className={`transition-all duration-1000 delay-1000 ${
-              isVisible
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-10"
+              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
             }`}
           >
             <a href="#about" className="inline-block animate-bounce">
