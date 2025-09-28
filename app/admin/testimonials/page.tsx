@@ -32,7 +32,7 @@ export default function TestimonialsAdminPage() {
   // ✅ Fetch testimonials
   const fetchTestimonials = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/testimonials/get-all?limit=100&page=1`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/testimonials/get-all?limit=100&page=1`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()
@@ -56,7 +56,7 @@ export default function TestimonialsAdminPage() {
       form.append("content", newTestimonial.content)
       if (newAvatarFile) form.append("avatar", newAvatarFile)
 
-      const res = await fetch(`http://localhost:5000/testimonials/create`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/testimonials/create`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: form,
@@ -82,7 +82,7 @@ export default function TestimonialsAdminPage() {
       form.append("content", testimonial.content)
       if (editAvatarFiles[index]) form.append("avatar", editAvatarFiles[index])
 
-      const res = await fetch(`http://localhost:5000/testimonials/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/testimonials/${id}`, {
         method: "PUT",
         headers: { Authorization: `Bearer ${token}` },
         body: form,
@@ -90,7 +90,11 @@ export default function TestimonialsAdminPage() {
       const data = await res.json()
       setTestimonials(testimonials.map((t) => (t.id === id ? data.data : t)))
       setIsEditing(null)
-      setEditAvatarFiles((prev) => ({ ...prev, [index]: undefined }))
+      setEditAvatarFiles((prev) => {
+        const updated = { ...prev }
+        delete updated[index]
+        return updated
+      })
     } catch (err) {
       console.error(err)
       alert("Failed to update testimonial")
@@ -101,7 +105,7 @@ export default function TestimonialsAdminPage() {
   const handleDeleteTestimonial = async (id: number) => {
     if (!confirm("Are you sure to delete this testimonial?")) return
     try {
-      await fetch(`http://localhost:5000/testimonials/${id}`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/testimonials/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       })

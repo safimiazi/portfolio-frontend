@@ -18,7 +18,7 @@ export default function AdminPersonalPage() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/profile/get-my-profile/${userId}`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/profile/get-my-profile/${userId}`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         })
 
@@ -66,7 +66,7 @@ export default function AdminPersonalPage() {
         form.append("avatar", avatarFile)
       }
 
-      const res = await fetch("http://localhost:5000/profile/update", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/profile/update`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
