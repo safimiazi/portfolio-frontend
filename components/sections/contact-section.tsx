@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Mail, Phone, MapPin, Send } from "lucide-react"
 import { getPortfolioData } from "@/lib/portfolio-data"
 
-export function ContactSection({profile}: any) {
+export function ContactSection({ profile }: any) {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
