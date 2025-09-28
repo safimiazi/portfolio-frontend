@@ -30,8 +30,8 @@ export function ProjectsSection({ projects }: any) {
           spaceBetween={24}
           slidesPerView={1}
           loop={true}
-          speed={4000} // smooth transition
-          autoplay={{ delay: 0, disableOnInteraction: false }}
+          speed={2000} // smooth transition
+          autoplay={{ delay: 400, disableOnInteraction: false }}
           pagination={{ clickable: true }}
           onSwiper={(swiper) => {
             // safely attach navigation buttons AFTER swiper is ready

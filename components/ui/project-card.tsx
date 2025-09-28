@@ -5,6 +5,7 @@ import { Navigation, Pagination, Autoplay } from "swiper/modules"
 import "swiper/css"
 import "swiper/css/navigation"
 import "swiper/css/pagination"
+import Link from "next/link"
 
 interface ProjectCardProps {
   project: any
@@ -13,11 +14,12 @@ interface ProjectCardProps {
 
 const ProjectCard = ({ project }: ProjectCardProps) => {
   return (
+        <Link href={`/projects/${project.id}`}>
     <div className="bg-background rounded-lg shadow-lg overflow-hidden">
       {/* Image Carousel */}
       <div className="relative w-full h-64">
         <Swiper
-          modules={[Navigation, Pagination, Autoplay]}
+          modules={[Navigation, Autoplay]}
           spaceBetween={10}
           slidesPerView={1}
           loop={true}
@@ -76,6 +78,7 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
         </div>
       </div>
     </div>
+    </Link>
   )
 }
 

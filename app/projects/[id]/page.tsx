@@ -1,246 +1,196 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeft, ExternalLink, Github, ChevronLeft, ChevronRight } from "lucide-react"
-import { getProjectById, getPortfolioData } from "@/lib/portfolio-data"
-import { Navigation } from "@/components/navigation"
-import { Footer } from "@/components/footer"
-import Image from "next/image"
-import Link from "next/link"
-import { notFound } from "next/navigation"
+import { useEffect, useState } from "react"
+import { useParams } from "next/navigation"
+import { motion } from "framer-motion" // Optional: Add for animations (install with `npm install framer-motion`)
 
-interface ProjectDetailPageProps {
-  params: {
-    id: string
-  }
-}
+const ProjectDetails = () => {
+  const { id } = useParams() // project id
+  const [project, setProject] = useState<any>(null)
 
-export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0)
-  const [isVisible, setIsVisible] = useState(false)
-
-  const project = getProjectById(params.id)
-
-  if (!project) {
-    notFound()
-  }
+  // Loading message state and cycling logic
+  const messages = [
+    'Fetching Projects...',
+    'Building Experience Showcase...',
+    'Crafting Skills Display...',
+    'Preparing Contact Info...',
+    'Polishing UI...',
+  ]
+  const [currentMessage, setCurrentMessage] = useState(messages[0])
 
   useEffect(() => {
-    setIsVisible(true)
-  }, [])
+    const interval = setInterval(() => {
+      setCurrentMessage((prev) => {
+        const currentIndex = messages.indexOf(prev)
+        const nextIndex = (currentIndex + 1) % messages.length
+        return messages[nextIndex]
+      })
+    }, 2500)
 
-  const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % project.images.length)
+    return () => clearInterval(interval)
+  }, [messages])
+
+  useEffect(() => {
+    const fetchProject = async () => {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/projects/project/${id}`
+        )
+        const result = await res.json()
+
+        // Set only the project data
+        setProject(result.data)
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+    fetchProject()
+  }, [id])
+
+  // Render loading state or project details
+  if (!project) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center text-primary py-20">
+        <div className="relative w-24 h-24 mb-6">
+          <div className="absolute inset-0 border-4 border-t-transparent border-primary rounded-full animate-[spin_2s_linear_infinite]"></div>
+          <div className="absolute inset-3 border-4 border-t-transparent border-primary/70 rounded-full animate-[spin_1.5s_linear_infinite_reverse]"></div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <svg
+              className="w-10 h-10 text-primary animate-pulse"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M5 10l7-7m0 0l7 7m-7-7v18"
+              />
+            </svg>
+          </div>
+        </div>
+        <div className="text-xl font-mono text-primary animate-[fadeIn_1s_ease-in-out]">
+          {currentMessage}
+        </div>
+      </div>
+    )
   }
-
-  const prevImage = () => {
-    setCurrentImageIndex((prev) => (prev - 1 + project.images.length) % project.images.length)
-  }
-
-  const portfolioData = getPortfolioData()
-  const relatedProjects = portfolioData.projects
-    .filter((p) => p.id !== project.id && p.technologies.some((tech) => project.technologies.includes(tech)))
-    .slice(0, 3)
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-white dark:from-gray-900 dark:via-gray-800 dark:to-black text-gray-900 dark:text-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+      {/* Decorative Background Elements */}
+      <div className="absolute top-0 left-0 w-64 h-64 bg-primary/20 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+      <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
 
-      <main className="pt-20">
-        {/* Back Button */}
-        <section className="py-6 border-b">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <Link href="/projects">
-              <Button variant="ghost" className="group">
-                <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
-                Back to Projects
-              </Button>
-            </Link>
-          </div>
-        </section>
 
-        {/* Project Header */}
-        <section className="py-16">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div
-              className={`transition-all duration-1000 ${
-                isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-              }`}
-            >
-              <div className="grid lg:grid-cols-2 gap-12 items-start">
-                {/* Project Images Slider */}
-                <div className="space-y-4">
-                  <div className="relative aspect-video rounded-lg overflow-hidden bg-muted">
-                    <Image
-                      src={project.images[currentImageIndex] || "/placeholder.svg"}
-                      alt={`${project.title} - Screenshot ${currentImageIndex + 1}`}
-                      fill
-                      className="object-cover"
-                    />
+      <motion.div
+        className="max-w-5xl mx-auto bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-xl p-8 shadow-2xl border border-gray-200 dark:border-gray-700"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        {/* Project Title */}
+        <motion.h1
+          className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-blue-500 dark:from-primary dark:to-blue-700 bg-clip-text text-transparent"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.6 }}
+        >
+          {project.title}
+        </motion.h1>
 
-                    {/* Navigation Arrows */}
-                    {project.images.length > 1 && (
-                      <>
-                        <button
-                          onClick={prevImage}
-                          className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
-                        >
-                          <ChevronLeft className="w-5 h-5" />
-                        </button>
-                        <button
-                          onClick={nextImage}
-                          className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
-                        >
-                          <ChevronRight className="w-5 h-5" />
-                        </button>
-                      </>
-                    )}
+        {/* Description */}
+        <motion.p
+          className="text-lg text-gray-600 dark:text-gray-300 mb-8 leading-relaxed"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4, duration: 0.6 }}
+        >
+          {project.detailsDesc}
+        </motion.p>
 
-                    {/* Image Counter */}
-                    {project.images.length > 1 && (
-                      <div className="absolute bottom-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
-                        {currentImageIndex + 1} / {project.images.length}
-                      </div>
-                    )}
-                  </div>
+        {/* Images Gallery */}
+        <motion.div
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6, duration: 0.6 }}
+        >
+          {project.images?.map((img: string, i: number) => (
+            <motion.img
+              key={i}
+              src={img}
+              alt={`${project.title} image ${i + 1}`}
+              className="rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 object-cover w-full h-48 border border-gray-200 dark:border-gray-700"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            />
+          ))}
+        </motion.div>
 
-                  {/* Thumbnail Navigation */}
-                  {project.images.length > 1 && (
-                    <div className="flex gap-2 overflow-x-auto pb-2">
-                      {project.images.map((image, index) => (
-                        <button
-                          key={index}
-                          onClick={() => setCurrentImageIndex(index)}
-                          className={`relative w-20 h-12 rounded-md overflow-hidden flex-shrink-0 border-2 transition-colors ${
-                            index === currentImageIndex ? "border-primary" : "border-transparent"
-                          }`}
-                        >
-                          <Image
-                            src={image || "/placeholder.svg"}
-                            alt={`Thumbnail ${index + 1}`}
-                            fill
-                            className="object-cover"
-                          />
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Project Info */}
-                <div className="space-y-6">
-                  <div>
-                    <div className="flex items-center gap-3 mb-4">
-                      <h1 className="text-3xl sm:text-4xl font-bold text-balance">{project.title}</h1>
-                      <Badge
-                        variant={
-                          project.status === "completed"
-                            ? "default"
-                            : project.status === "in-progress"
-                              ? "secondary"
-                              : "outline"
-                        }
-                        className="capitalize"
-                      >
-                        {project.status.replace("-", " ")}
-                      </Badge>
-                      {project.featured && <Badge variant="destructive">Featured</Badge>}
-                    </div>
-                    <p className="text-lg text-muted-foreground text-pretty">{project.description}</p>
-                  </div>
-
-                  <div>
-                    <h3 className="text-xl font-semibold mb-3">About This Project</h3>
-                    <p className="text-muted-foreground text-pretty">{project.longDescription}</p>
-                  </div>
-
-                  <div>
-                    <h3 className="text-xl font-semibold mb-3">Technologies Used</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {project.technologies.map((tech) => (
-                        <Badge key={tech} variant="secondary">
-                          {tech}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="flex gap-4 pt-4">
-                    <Button size="lg" className="group">
-                      <a
-                        href={project.liveUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2"
-                      >
-                        <ExternalLink className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                        View Live Project
-                      </a>
-                    </Button>
-                    <Button size="lg" variant="outline" className="group bg-transparent">
-                      <a
-                        href={project.githubUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2"
-                      >
-                        <Github className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                        View Source Code
-                      </a>
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Related Projects */}
-        {relatedProjects.length > 0 && (
-          <section className="py-16 bg-muted/30">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-              <div
-                className={`transition-all duration-1000 delay-500 ${
-                  isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-                }`}
+        {/* Technologies */}
+        <motion.div
+          className="mb-10"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8, duration: 0.6 }}
+        >
+          <h3 className="text-xl font-semibold text-primary mb-4">Technologies Used</h3>
+          <div className="flex flex-wrap gap-2">
+            {project.usedTechnologies?.map((tech: string) => (
+              <span
+                key={tech}
+                className="bg-primary/20 text-primary dark:bg-primary/30 dark:text-primary-foreground text-sm px-3 py-1 rounded-full hover:bg-primary/30 dark:hover:bg-primary/40 transition-colors duration-200 cursor-default"
               >
-                <h2 className="text-2xl font-bold mb-8 text-center">Related Projects</h2>
-                <div className="grid md:grid-cols-3 gap-6">
-                  {relatedProjects.map((relatedProject) => (
-                    <Card key={relatedProject.id} className="group overflow-hidden hover:shadow-lg transition-shadow">
-                      <Link href={`/projects/${relatedProject.id}`}>
-                        <div className="relative h-32 overflow-hidden">
-                          <Image
-                            src={relatedProject.images[0] || "/placeholder.svg"}
-                            alt={relatedProject.title}
-                            fill
-                            className="object-cover group-hover:scale-110 transition-transform duration-300"
-                          />
-                        </div>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-lg group-hover:text-primary transition-colors">
-                            {relatedProject.title}
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-sm text-muted-foreground text-pretty line-clamp-2">
-                            {relatedProject.description}
-                          </p>
-                        </CardContent>
-                      </Link>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </section>
-        )}
-      </main>
+                {tech}
+              </span>
+            ))}
+          </div>
+        </motion.div>
 
-      <Footer />
+        {/* Links */}
+        <motion.div
+          className="flex flex-col sm:flex-row gap-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1, duration: 0.6 }}
+        >
+          {project.liveLink && (
+            <a
+              href={project.liveLink}
+              className="text-primary hover:text-primary-dark font-medium underline underline-offset-4 transition-colors duration-200"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Live Demo
+            </a>
+          )}
+          {project.githubFrontendLink && (
+            <a
+              href={project.githubFrontendLink}
+              className="text-primary hover:text-primary-dark font-medium underline underline-offset-4 transition-colors duration-200"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Frontend Code
+            </a>
+          )}
+          {project.githubBackendLink && (
+            <a
+              href={project.githubBackendLink}
+              className="text-primary hover:text-primary-dark font-medium underline underline-offset-4 transition-colors duration-200"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Backend Code
+            </a>
+          )}
+        </motion.div>
+      </motion.div>
     </div>
   )
 }
+
+export default ProjectDetails
