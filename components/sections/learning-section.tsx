@@ -264,7 +264,7 @@ export function LearningSection() {
         </div>
 
         {/* Follow Learning Journey Button */}
-        <motion.div
+        {/* <motion.div
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
@@ -280,7 +280,7 @@ export function LearningSection() {
               Follow My Learning Journey
             </Button>
           </motion.div>
-        </motion.div>
+        </motion.div> */}
       </div>
     </section>
   )
