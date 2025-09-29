@@ -23,7 +23,7 @@ export function SkillsSection() {
     async function fetchSkills() {
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/skills/get-all-for-showcase?page=1&limit=10&order=desc`
+          `${process.env.NEXT_PUBLIC_API_URL}/skills/get-all-for-showcase?page=1&limit=100&order=desc`
         )
         const data = await res.json()
 
