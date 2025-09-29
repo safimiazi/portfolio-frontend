@@ -61,7 +61,7 @@ export function HeroSection({ profile }: { profile: any }) {
               isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
             }`}
           >
-            <div className="relative w-32 h-32 mx-auto mb-6">
+            <div className="relative mt-24 w-32 h-32 mx-auto mb-6">
               <Image
                 src={profile.photo || "/placeholder.svg"}
                 alt={profile.name}
